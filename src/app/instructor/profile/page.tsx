@@ -64,7 +64,7 @@ export default function InstructorProfilePage() {
             {profile.pricePerSession && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Price per Session</p>
-                <p className="text-lg">${profile.pricePerSession}</p>
+                <p className="text-lg">UGX {profile.pricePerSession.toLocaleString()}</p>
               </div>
             )}
           </CardContent>

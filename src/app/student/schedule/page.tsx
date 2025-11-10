@@ -16,7 +16,7 @@ export default function StudentSchedulePage() {
     const currentUser = mockDb.getCurrentUser();
     if (!currentUser) return;
     
-    const allSessions = await mockDb.getSessions();
+    const allSessions = await mockDb.getSessions({ studentId: currentUser.id });
     setSessions(allSessions);
   };
 

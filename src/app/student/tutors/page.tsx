@@ -58,7 +58,7 @@ export default function StudentTutorsPage() {
                 )}
                 {instructor.pricePerSession && (
                   <p className="text-sm">
-                    <span className="font-medium">Price per session:</span> ${instructor.pricePerSession}
+                    <span className="font-medium">Price per session:</span> UGX {instructor.pricePerSession.toLocaleString()}
                   </p>
                 )}
               </div>
