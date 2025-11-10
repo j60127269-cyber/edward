@@ -50,6 +50,25 @@ export default function StudentDashboard() {
     };
 
     loadDashboard();
+
+    // Listen for mockDb updates (when enrollments happen)
+    const handleMockDbUpdate = () => {
+      loadDashboard();
+    };
+    window.addEventListener("mockDbUpdated", handleMockDbUpdate);
+
+    // Also reload when page becomes visible (user navigates back)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadDashboard();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("mockDbUpdated", handleMockDbUpdate);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   const formatSessionTime = (dateString: string) => {

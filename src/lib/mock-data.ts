@@ -103,11 +103,24 @@ class MockDatabase {
 
   // Initialize with sample data
   constructor() {
-    this.initializeSampleData();
+    // Load from storage first (if exists)
+    const hasStoredData = this.loadFromStorage();
+    
+    // Always initialize users and institutions (static data)
+    // This will add sample users, but stored users are already loaded
+    this.initializeUsersAndInstitutions();
+    
+    // If no stored data, initialize sample data for courses, exams, sessions, submissions
+    if (!hasStoredData || this.courses.length === 0) {
+      this.initializeCoursesExamsSessions();
+      this.saveToStorage();
+    }
   }
 
-  private initializeSampleData() {
-    // Institutions
+  // Initialize static data (users and institutions) - these don't need persistence
+  // Note: Users are loaded from storage first, so this only adds sample users if they don't exist
+  private initializeUsersAndInstitutions() {
+    // Institutions (always initialize)
     this.institutions = [
       {
         id: "inst1",
@@ -272,28 +285,252 @@ class MockDatabase {
         createdAt: new Date().toISOString(),
       },
     ];
-    this.users.push(...students);
-
-    // Users - Institution Admins
-    this.users.push(
+    
+    // Add sample users only if they don't already exist (from localStorage)
+    const existingUserIds = new Set(this.users.map(u => u.id));
+    const existingUserEmails = new Set(this.users.map(u => u.email));
+    
+    // Sample instructors to add if they don't exist
+    const sampleInstructors = [
       {
+        id: "instructor1",
+        email: "nakato.sarah@mak.ac.ug",
+        name: "Dr. Sarah Nakato",
+        role: "instructor" as const,
+        bio: "Expert in Computer Science with 12 years of experience. PhD in Software Engineering from Makerere University.",
+        institutionId: "inst1",
+        subjectSpecialization: "Computer Science",
+        pricePerSession: 50000,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "instructor2",
+        email: "okello.michael@mak.ac.ug",
+        name: "Prof. Michael Okello",
+        role: "instructor" as const,
+        bio: "Mathematics and Statistics specialist with expertise in Data Analysis and Machine Learning.",
+        institutionId: "inst1",
+        subjectSpecialization: "Mathematics",
+        pricePerSession: 45000,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "instructor3",
+        email: "namukasa.jane@kyu.ac.ug",
+        name: "Dr. Jane Namukasa",
+        role: "instructor" as const,
+        bio: "Software Engineering expert specializing in Web Development and Mobile Applications.",
+        institutionId: "inst2",
+        subjectSpecialization: "Software Engineering",
+        pricePerSession: 55000,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "instructor4",
+        email: "kabugo.david@ucu.ac.ug",
+        name: "Dr. David Kabugo",
+        role: "instructor" as const,
+        bio: "Network Security and Cybersecurity specialist with industry experience.",
+        institutionId: "inst3",
+        subjectSpecialization: "Cybersecurity",
+        pricePerSession: 60000,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "instructor5",
+        email: "nakato.mary@mak.ac.ug",
+        name: "Prof. Mary Nakato",
+        role: "instructor" as const,
+        bio: "Database Systems and Data Management expert with focus on modern database technologies.",
+        institutionId: "inst1",
+        subjectSpecialization: "Database Systems",
+        pricePerSession: 48000,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "instructor6",
+        email: "tumusiime.peter@umu.ac.ug",
+        name: "Dr. Peter Tumusiime",
+        role: "instructor" as const,
+        bio: "Business Administration and Management expert with MBA from international universities.",
+        institutionId: "inst4",
+        subjectSpecialization: "Business Administration",
+        pricePerSession: 52000,
+        createdAt: new Date().toISOString(),
+      },
+    ];
+    
+    // Add instructors if they don't exist (check by email)
+    sampleInstructors.forEach(instructor => {
+      if (!existingUserEmails.has(instructor.email) && !existingUserIds.has(instructor.id)) {
+        this.users.push(instructor);
+      }
+    });
+    
+    // Add sample students if they don't exist
+    const sampleStudents = [
+      {
+        id: "student1",
+        email: "nakato.mary@mak.ac.ug",
+        name: "Nakato Mary",
+        role: "student",
+        institutionId: "inst1",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "student2",
+        email: "okello.james@mak.ac.ug",
+        name: "Okello James",
+        role: "student",
+        institutionId: "inst1",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "student3",
+        email: "namukasa.alice@kyu.ac.ug",
+        name: "Namukasa Alice",
+        role: "student",
+        institutionId: "inst2",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "student4",
+        email: "kabugo.john@ucu.ac.ug",
+        name: "Kabugo John",
+        role: "student",
+        institutionId: "inst3",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "student5",
+        email: "tumusiime.rose@umu.ac.ug",
+        name: "Tumusiime Rose",
+        role: "student",
+        institutionId: "inst4",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "student6",
+        email: "nakato.peter@mak.ac.ug",
+        name: "Nakato Peter",
+        role: "student",
+        institutionId: "inst1",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "student7",
+        email: "okello.sarah@kyu.ac.ug",
+        name: "Okello Sarah",
+        role: "student",
+        institutionId: "inst2",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "student8",
+        email: "namukasa.david@ucu.ac.ug",
+        name: "Namukasa David",
+        role: "student",
+        institutionId: "inst3",
+        createdAt: new Date().toISOString(),
+      },
+    ];
+    
+    sampleStudents.forEach(student => {
+      if (!existingUserEmails.has(student.email) && !existingUserIds.has(student.id)) {
+        this.users.push(student);
+      }
+    });
+
+    // Add institution admins if they don't exist
+    if (!existingUserEmails.has("admin@mak.ac.ug")) {
+      this.users.push({
         id: "institution1",
         email: "admin@mak.ac.ug",
         name: "Makerere University Admin",
         role: "institution",
         institutionId: "inst1",
         createdAt: new Date().toISOString(),
-      },
-      {
+      });
+    }
+    if (!existingUserEmails.has("admin@kyu.ac.ug")) {
+      this.users.push({
         id: "institution2",
         email: "admin@kyu.ac.ug",
         name: "Kyambogo University Admin",
         role: "institution",
         institutionId: "inst2",
         createdAt: new Date().toISOString(),
-      }
-    );
+      });
+    }
+    
+    // Save users after merging
+    this.saveToStorage();
+  }
 
+  // Load data from localStorage
+  private loadFromStorage(): boolean {
+    if (typeof window === "undefined") return false;
+    
+    try {
+      let hasData = false;
+      
+      // Load users first (before initializing sample users)
+      const storedUsers = localStorage.getItem("mockDb_users");
+      if (storedUsers) {
+        const parsedUsers = JSON.parse(storedUsers);
+        this.users = parsedUsers; // Load all stored users
+        hasData = true;
+      }
+      
+      const storedCourses = localStorage.getItem("mockDb_courses");
+      if (storedCourses) {
+        this.courses = JSON.parse(storedCourses);
+        hasData = true;
+      }
+      
+      const storedExams = localStorage.getItem("mockDb_exams");
+      if (storedExams) {
+        this.exams = JSON.parse(storedExams);
+        hasData = true;
+      }
+      
+      const storedSubmissions = localStorage.getItem("mockDb_examSubmissions");
+      if (storedSubmissions) {
+        this.examSubmissions = JSON.parse(storedSubmissions);
+        hasData = true;
+      }
+      
+      const storedSessions = localStorage.getItem("mockDb_sessions");
+      if (storedSessions) {
+        this.sessions = JSON.parse(storedSessions);
+        hasData = true;
+      }
+      
+      return hasData;
+    } catch (e) {
+      console.error("Error loading from localStorage:", e);
+      return false;
+    }
+  }
+
+  // Save data to localStorage
+  private saveToStorage() {
+    if (typeof window === "undefined") return;
+    
+    try {
+      // Save all users (including newly created ones)
+      localStorage.setItem("mockDb_users", JSON.stringify(this.users));
+      localStorage.setItem("mockDb_courses", JSON.stringify(this.courses));
+      localStorage.setItem("mockDb_exams", JSON.stringify(this.exams));
+      localStorage.setItem("mockDb_examSubmissions", JSON.stringify(this.examSubmissions));
+      localStorage.setItem("mockDb_sessions", JSON.stringify(this.sessions));
+    } catch (e) {
+      console.error("Error saving to localStorage:", e);
+    }
+  }
+
+  // Initialize courses, exams, sessions, and submissions (persisted data)
+  private initializeCoursesExamsSessions() {
     // Courses
     this.courses = [
       {
@@ -412,46 +649,46 @@ class MockDatabase {
     this.exams = [
       {
         id: "exam1",
-        title: "Web Development Midterm Exam",
-        description: "Covers HTML, CSS, and JavaScript basics. 60 minutes duration.",
+        title: "Agriculture Midterm Exam",
+        description: "Covers farming techniques, crop management, and agricultural practices. 60 minutes duration.",
         courseId: "course1",
-        courseName: "Introduction to Web Development",
+        courseName: "Introduction to Agriculture in Uganda",
         instructorId: "instructor1",
         instructorName: "Dr. Sarah Nakato",
         duration: 60,
         questions: [
           {
             id: "q1",
-            question: "What does HTML stand for?",
-            options: ["HyperText Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyperlink and Text Markup Language"],
-            correctAnswer: 0,
+            question: "What is the primary growing season in Uganda?",
+            options: ["January-March", "March-May and September-November", "June-August", "December only"],
+            correctAnswer: 1,
             points: 10,
           },
           {
             id: "q2",
-            question: "Which CSS property is used to change text color?",
-            options: ["font-color", "text-color", "color", "text-style"],
-            correctAnswer: 2,
+            question: "Which crop is Uganda's main cash crop?",
+            options: ["Maize", "Coffee", "Rice", "Wheat"],
+            correctAnswer: 1,
             points: 10,
           },
           {
             id: "q3",
-            question: "What is the correct way to declare a JavaScript variable?",
-            options: ["var myVar = 5;", "variable myVar = 5;", "v myVar = 5;", "myVar = 5;"],
-            correctAnswer: 0,
+            question: "What is crop rotation?",
+            options: ["Planting the same crop every year", "Growing different crops in sequence on the same land", "Watering crops", "Harvesting crops"],
+            correctAnswer: 1,
             points: 10,
           },
           {
             id: "q4",
-            question: "Which HTML tag is used for the largest heading?",
-            options: ["<h6>", "<heading>", "<h1>", "<head>"],
-            correctAnswer: 2,
+            question: "Which farming method is most sustainable for Uganda's climate?",
+            options: ["Monoculture", "Mixed farming", "Industrial farming", "None of the above"],
+            correctAnswer: 1,
             points: 10,
           },
           {
             id: "q5",
-            question: "What does CSS stand for?",
-            options: ["Computer Style Sheets", "Cascading Style Sheets", "Creative Style Sheets", "Colorful Style Sheets"],
+            question: "What is the importance of organic matter in soil?",
+            options: ["It has no importance", "It improves soil structure and fertility", "It harms crops", "It is expensive"],
             correctAnswer: 1,
             points: 10,
           },
@@ -784,6 +1021,7 @@ class MockDatabase {
         createdAt: new Date().toISOString(),
       };
       this.users.push(user);
+      this.saveToStorage(); // Persist the new user
     }
     this.setCurrentUser(user);
     return user;
@@ -798,6 +1036,7 @@ class MockDatabase {
       createdAt: new Date().toISOString(),
     };
     this.users.push(user);
+    this.saveToStorage(); // Persist the new user
     this.setCurrentUser(user);
     return user;
   }
@@ -826,6 +1065,11 @@ class MockDatabase {
     const index = this.users.findIndex((u) => u.id === id);
     if (index === -1) throw new Error("User not found");
     this.users[index] = { ...this.users[index], ...updates };
+    this.saveToStorage(); // Persist user updates
+    // Also update currentUser if it's the same user
+    if (this.currentUser?.id === id) {
+      this.setCurrentUser(this.users[index]);
+    }
     return this.users[index];
   }
 
@@ -852,6 +1096,7 @@ class MockDatabase {
       createdAt: new Date().toISOString(),
     };
     this.courses.push(newCourse);
+    this.saveToStorage(); // Persist the new course
     return newCourse;
   }
 
@@ -863,6 +1108,12 @@ class MockDatabase {
       }
       if (!course.enrolledStudents.includes(studentId)) {
         course.enrolledStudents.push(studentId);
+        this.saveToStorage(); // Persist the enrollment
+        
+        // Dispatch custom event to notify components of the change
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("mockDbUpdated", { detail: { type: "enrollment", courseId, studentId } }));
+        }
       }
     }
   }
@@ -890,6 +1141,7 @@ class MockDatabase {
       createdAt: new Date().toISOString(),
     };
     this.exams.push(newExam);
+    this.saveToStorage(); // Persist the new exam
     return newExam;
   }
 
@@ -916,6 +1168,7 @@ class MockDatabase {
       submittedAt: new Date().toISOString(),
     };
     this.examSubmissions.push(newSubmission);
+    this.saveToStorage(); // Persist the new submission
     return newSubmission;
   }
 
@@ -941,6 +1194,7 @@ class MockDatabase {
       id: `session_${Date.now()}`,
     };
     this.sessions.push(newSession);
+    this.saveToStorage(); // Persist the new session
     return newSession;
   }
 
