@@ -6,7 +6,7 @@
 1. Go to https://github.com/new
 2. Enter repository name (e.g., `how-academia`)
 3. Choose public or private
-4. **DO NOT** initialize with README, .gitignore, or license (since you already have files)
+4. **DO NOT** initialize with README, .gitignore, or license (since you already have files)iji
 5. Click "Create repository"
 
 ### Step 2: Initialize Git and Push Your Code
